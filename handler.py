@@ -23,13 +23,12 @@ def get_sorting():
                 print("Wrong option", end="\n\n")
         except ValueError:
             pass
-
     return _sorting
 
 
-def ask_for_duplicates():
+def ask_question(_message):
     while True:
-        answer = input("Check for duplicates?\n")
+        answer = input(f"{_message}\n")
         if answer.lower() == 'yes':
             return True
         elif answer.lower() == 'no':
@@ -65,6 +64,20 @@ def find_duplicates(_sizes, _files):
     return _hashvalues
 
 
+def get_indices(length):
+    length_list = list(range(length))
+    while True:
+        try:
+            _indices = [int(x) for x in input("Enter file numbers to delete:\n").split()]
+            _indices[0]
+            for _index in _indices:
+                length_list[_index - 1]
+            else:
+                return _indices
+        except (ValueError, IndexError):
+            print("\nWrong format\n")
+
+
 try:
     root = sys.argv[1]
     file_format = input("Enter file format:\n")
@@ -83,10 +96,11 @@ try:
             print(_file)
         print()
 
-    if ask_for_duplicates():
+    if ask_question("Check for duplicates?"):
         hashvalues = find_duplicates(sorted_sizes, duplicates)
         count = 1
         print()
+        duplicate_list = list()
         for size in hashvalues:
             print(size, 'bytes')
             for hashvalue in hashvalues[size]:
@@ -94,8 +108,17 @@ try:
                 print('Hash:', hashvalue)
                 for _file in files:
                     print(f"{count}.", _file)
+                    duplicate_list.append(_file)
                     count += 1
             print()
+
+        if ask_question("Delete files?"):
+            indices = get_indices(len(duplicate_list))
+            freedsize = 0
+            for index in indices:
+                freedsize += os.path.getsize(duplicate_list[index - 1])
+                os.remove(duplicate_list[index - 1])
+            print(f"Total freed up space: {freedsize} bytes")
 
 except IndexError:
     print("Directory is not specified")
