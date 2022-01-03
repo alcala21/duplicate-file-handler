@@ -1,39 +1,22 @@
 import sys
 import os
-import textwrap
 from collections import defaultdict
 import hashlib
 
 
 def get_sorting():
-    print(textwrap.dedent("""
-    Size sorting options:
-    1. Descending
-    2. Ascending
-    """))
+    _message = ["Size sorting options:", "1. Descending", "2. Ascending"]
+    print("\n" + "\n".join(_message) + "\n")
+    return ask_question("Enter sorting option:")
 
-    _sorting = 0
+
+def ask_question(_message, _type="sorting"):
     while True:
         try:
-            _sorting = int(input("Enter sorting option:\n"))
-            if _sorting <= 2:
-                break
-            else:
-                print()
-                print("Wrong option", end="\n\n")
-        except ValueError:
-            pass
-    return _sorting
-
-
-def ask_question(_message):
-    while True:
-        answer = input(f"{_message}\n")
-        if answer.lower() == 'yes':
-            return True
-        elif answer.lower() == 'no':
-            return False
-        else:
+            answer = input(f"{_message}\n")
+            return {1: 1, 2: 2}[int(answer)] if _type == "sorting" \
+                else {"yes": 1, "no": 0}[answer.lower()]
+        except (ValueError, KeyError):
             print("\nWrong option\n")
 
 
@@ -53,8 +36,8 @@ def find_duplicates(_sizes, _files):
     _hashvalues = dict()
     for _size in _sizes:
         _hashvalues[_size] = defaultdict(list)
-        for _file in _files[_size]:
-            _hashvalues[_size][get_hashvalue(_file)].append(_file)
+        for _ifile in _files[_size]:
+            _hashvalues[_size][get_hashvalue(_ifile)].append(_ifile)
         for _hashvalue in _hashvalues[_size].copy():
             if len(_hashvalues[_size][_hashvalue]) == 1:
                 del _hashvalues[_size][_hashvalue]
@@ -96,7 +79,7 @@ try:
             print(_file)
         print()
 
-    if ask_question("Check for duplicates?"):
+    if ask_question("Check for duplicates?", _type="yesno"):
         hashvalues = find_duplicates(sorted_sizes, duplicates)
         count = 1
         print()
@@ -112,7 +95,7 @@ try:
                     count += 1
             print()
 
-        if ask_question("Delete files?"):
+        if duplicate_list and ask_question("Delete files?", _type="yesno"):
             indices = get_indices(len(duplicate_list))
             freedsize = 0
             for index in indices:
